@@ -38,24 +38,11 @@
         font-size: clamp(16px, 4vw, 24px); /* 随屏幕缩放 */
         color: #fff;
     }
-    #arrow {
-        position: absolute;
-        top: -2vw;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 0;
-        height: 0;
-        border-left: 2.5vw solid transparent;
-        border-right: 2.5vw solid transparent;
-        border-bottom: 4vw solid red;
-        z-index: 10;
-    }
 </style>
 </head>
 <body>
     <div id="wheel-wrapper">
         <h2 style="margin: 0 0 35px; text-align:center;">点击转盘开始抽取快乐跑距离</h2>
-        <div id="arrow"></div>
         <div id="wheel"></div>
     </div>
 </body>
