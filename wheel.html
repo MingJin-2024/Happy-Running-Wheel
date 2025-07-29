@@ -1,111 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>MingJin的快乐转盘</title>
     <style>
-    body {
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        background: #f5f5f5;
-        font-family: Arial, sans-serif;
-    }
-    #wheel-wrapper {
-        position: relative;
-        width: min(500px, 80vw);   /* 桌面 500px，手机 80% 屏宽 */
-        margin: 60px auto;
-    }
-    #wheel {
-        width: 100%;
-        aspect-ratio: 1/1;         /* 保持正方形 */
-        border-radius: 0;
-        position: relative;
-        overflow: hidden;
-        transition: transform 3s ease-out;
-        cursor: pointer;
-    }
-    .section {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    clip-path: polygon(50% 50%, var(--p1) var(--p2), var(--p3) var(--p4));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: clamp(16px, 4vw, 24px);
-    color: #fff;
-}
-</style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            background:#f5f5f5;
+            font-family:Arial,Helvetica,sans-serif;
+            padding:20px;
+        }
+        h2{
+            margin:0 0 30px;
+            font-size:clamp(20px,6vw,28px);
+            text-align:center;
+        }
+        #wheel-wrapper{
+            position:relative;
+            width:min(500px,80vw);
+            aspect-ratio:1/1;
+        }
+        #wheel{
+            width:100%;
+            height:100%;
+            border-radius:50%;
+            position:relative;
+            overflow:hidden;
+            transition:transform 3s ease-out;
+            cursor:pointer;
+        }
+        .section{
+            position:absolute;
+            width:50%;
+            height:50%;
+            transform-origin:100% 100%;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight:bold;
+            font-size:clamp(14px,3.5vw,22px);
+            color:#fff;
+        }
+    </style>
 </head>
+
 <body>
+    <h2>点击转盘开始抽取快乐跑距离</h2>
     <div id="wheel-wrapper">
-        <h2 style="margin: 0 0 35px; text-align:center;">点击转盘开始抽取快乐跑距离</h2>
         <div id="wheel"></div>
     </div>
-</body>
 
     <script>
-        const prizes = ['Double 5.20km', '5.55km', '6.66km', '7.77km', '8.88km','你说了不算'];
+        const prizes = ['Double 5.20km', '5.55km', '6.66km', '7.77km', '8.88km', '你说了不算'];
         const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
         const wheel = document.getElementById('wheel');
-        
-        // 创建转盘扇形
+
+        // 创建扇形
         prizes.forEach((prize, index) => {
-    const ang = 360 / prizes.length;          // 每块角度
-    const rot = index * ang;                  // 起始角度
-    const next = (index + 1) * ang;           // 结束角度
-
-    // 转为百分比坐标
-    const p1 = 50 + 50 * Math.cos((rot - 90) * Math.PI / 180);
-    const p2 = 50 + 50 * Math.sin((rot - 90) * Math.PI / 180);
-    const p3 = 50 + 50 * Math.cos((next - 90) * Math.PI / 180);
-    const p4 = 50 + 50 * Math.sin((next - 90) * Math.PI / 180);
-
-    const section = document.createElement('div');
-    section.className = 'section';
-    section.style.background = colors[index];
-    section.style.setProperty('--p1', `${p1}%`);
-    section.style.setProperty('--p2', `${p2}%`);
-    section.style.setProperty('--p3', `${p3}%`);
-    section.style.setProperty('--p4', `${p4}%`);
-
-    // 文字中心点
-    const textAng = rot + ang / 2;
-    const tx = 50 + 35 * Math.cos((textAng - 90) * Math.PI / 180);
-    const ty = 50 + 35 * Math.sin((textAng - 90) * Math.PI / 180);
-    section.style.transform = `translate(-50%, -50%)`;
-    section.style.left = `${tx}%`;
-    section.style.top = `${ty}%`;
-    section.textContent = prize;
-
-    wheel.appendChild(section);
-});
+            const section = document.createElement('div');
+            section.className = 'section';
+            section.style.background = colors[index];
+            section.style.transform = `rotate(${index * 60}deg)`;
+            section.textContent = prize;
+            wheel.appendChild(section);
+        });
 
         let isSpinning = false;
         wheel.addEventListener('click', () => {
-    if (isSpinning) return;
+            if (isSpinning) return;
 
-    const today = new Date().toISOString().slice(0, 10);
-    if (localStorage.getItem('wheelLastDraw') === today) {
-        alert('今天已经抽过啦，你要跑死主包是吧！');
-        return;
-    }
+            const today = new Date().toISOString().slice(0, 10);
+            if (localStorage.getItem('wheelLastDraw') === today) {
+                alert('今天已经抽过啦，你要跑死主包是吧！');
+                return;
+            }
 
-    isSpinning = true;
-    const randomDegree = 1800 + Math.floor(Math.random() * 360);
-    wheel.style.transform = `rotate(${randomDegree}deg)`;
+            isSpinning = true;
+            const randomDegree = 1800 + Math.floor(Math.random() * 360);
+            wheel.style.transform = `rotate(${randomDegree}deg)`;
 
-    setTimeout(() => {
-        isSpinning = false;
-        const actualDegree = randomDegree % 360;
-        const prizeIndex = Math.floor((360 - actualDegree) / 60);
-        alert(`恭喜主包喜提：${prizes[prizeIndex]}`);
-        localStorage.setItem('wheelLastDraw', today);
-    }, 3000);
-});
+            setTimeout(() => {
+                isSpinning = false;
+                const actualDegree = randomDegree % 360;
+                const prizeIndex = Math.floor((360 - actualDegree) / 60);
+                alert(`恭喜主包喜提：${prizes[prizeIndex]}`);
+                localStorage.setItem('wheelLastDraw', today);
+            }, 3000);
+        });
     </script>
 </body>
 </html>
