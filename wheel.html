@@ -47,7 +47,7 @@
 </head>
 <body>
     <div style="text-align: center;">
-        <h2>点击抽取快乐跑距离！</h2>
+        <h2 style="margin-bottom: 30px;">点击抽取快乐跑距离！</h2>
         <div style="position: relative;">
             <div id="arrow"></div>
             <div id="wheel"></div>
@@ -71,19 +71,28 @@
 
         let isSpinning = false;
         wheel.addEventListener('click', () => {
-            if (isSpinning) return;
-            isSpinning = true;
-            
-            const randomDegree = 1800 + Math.floor(Math.random() * 360);
-            wheel.style.transform = `rotate(${randomDegree}deg)`;
-            
-            setTimeout(() => {
-                isSpinning = false;
-                const actualDegree = randomDegree % 360;
-                const prizeIndex = Math.floor((360 - actualDegree) / 60);
-                alert(`恭喜主包：${prizes[prizeIndex]}`);
-            }, 3000);
-        });
+    if (isSpinning) return;
+
+    // 新增：检查本地记录
+    if (localStorage.getItem('wheelDrawn') === 'true') {
+        alert('您已经参与过抽奖啦！');
+        return;
+    }
+
+    isSpinning = true;
+    const randomDegree = 1800 + Math.floor(Math.random() * 360);
+    wheel.style.transform = `rotate(${randomDegree}deg)`;
+
+    setTimeout(() => {
+        isSpinning = false;
+        const actualDegree = randomDegree % 360;
+        const prizeIndex = Math.floor((360 - actualDegree) / 60);
+        alert(`恭喜获得：${prizes[prizeIndex]}`);
+
+        // 新增：标记已抽过
+        localStorage.setItem('wheelDrawn', 'true');
+    }, 3000);
+});
     </script>
 </body>
 </html>
