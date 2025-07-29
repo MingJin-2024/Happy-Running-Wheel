@@ -55,7 +55,7 @@
     </div>
 
     <script>
-        const prizes = ['Double 5.20km', '5.55km', '6.66km', '7.77km', '8.88km'];
+        const prizes = ['Double 5.20km', '5.55km', '6.66km', '7.77km', '8.88km','你说了不算'];
         const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
         const wheel = document.getElementById('wheel');
         
@@ -81,7 +81,7 @@
                 isSpinning = false;
                 const actualDegree = randomDegree % 360;
                 const prizeIndex = Math.floor((360 - actualDegree) / 60);
-                alert(`恭喜获得：${prizes[prizeIndex]}`);
+                alert(`恭喜主包：${prizes[prizeIndex]}`);
             }, 3000);
         });
     </script>
