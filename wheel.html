@@ -1,98 +1,306 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>MingJin的快乐转盘</title>
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{
-            display:flex;
-            flex-direction:column;
-            justify-content:center;
-            align-items:center;
-            min-height:100vh;
-            background:#f5f5f5;
-            font-family:Arial,Helvetica,sans-serif;
-            padding:20px;
-        }
-        h2{
-            margin:0 0 30px;
-            font-size:clamp(20px,6vw,28px);
-            text-align:center;
-        }
-        #wheel-wrapper{
-            position:relative;
-            width:min(500px,80vw);
-            aspect-ratio:1/1;
-        }
-        #wheel{
-            width:100%;
-            height:100%;
-            border-radius:50%;
-            position:relative;
-            overflow:hidden;
-            transition:transform 3s ease-out;
-            cursor:pointer;
-        }
-        .section{
-            position:absolute;
-            width:50%;
-            height:50%;
-            transform-origin:100% 100%;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-weight:bold;
-            font-size:clamp(14px,3.5vw,22px);
-            color:#fff;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>MingJin的快乐转盘</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+    font-family:'Microsoft YaHei',Arial,Helvetica,sans-serif;
+    padding:20px;
+    color: #fff;
+    text-align: center;
+}
+h2{
+    margin:0 0 30px;
+    font-size:clamp(20px,6vw,28px);
+    text-align:center;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.description {
+    margin-bottom: 20px;
+    max-width: 500px;
+    line-height: 1.6;
+}
+#wheel-wrapper{
+    position:relative;
+    width:min(500px,80vw);
+    aspect-ratio:1/1;
+    margin-bottom: 30px;
+}
+#wheel{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    position:relative;
+    overflow:hidden;
+    transition:transform 3s cubic-bezier(0.17, 0.67, 0.19, 0.97);
+    cursor:pointer;
+    border:8px solid #fff;
+    box-shadow:0 0 20px rgba(0,0,0,0.2);
+}
+.label{
+    position:absolute;
+    font-weight:bold;
+    color:#fff;
+    text-shadow:0 0 3px rgba(0,0,0,0.8);
+    white-space:nowrap;
+    pointer-events:none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform-origin: center center;
+}
+/* 转盘中心的指示器 */
+#wheel-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 15px 20px 15px;
+    border-style: solid;
+    border-color: transparent transparent #ff4757 transparent;
+    z-index: 10;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,0.3));
+}
+#result {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 20px;
+    min-height: 40px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.5s ease;
+}
+#result.highlight {
+    background: rgba(255, 71, 87, 0.3);
+    transform: scale(1.05);
+}
+.stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+.stat-box {
+    background: rgba(255,255,255,0.15);
+    padding: 10px 15px;
+    border-radius: 8px;
+    min-width: 120px;
+}
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffdd59;
+}
+footer {
+    margin-top: 30px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.7);
+}
+.spin-btn {
+    background: linear-gradient(to right, #ff416c, #ff4b2b);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    margin-top: 20px;
+    box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4);
+    transition: all 0.3s ease;
+}
+.spin-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 75, 43, 0.6);
+}
+.spin-btn:disabled {
+    background: linear-gradient(to right, #cccccc, #999999);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+</style>
 </head>
 
 <body>
-    <h2>点击转盘开始抽取快乐跑距离</h2>
-    <div id="wheel-wrapper">
-        <div id="wheel"></div>
+<h2>MingJin快乐跑距离转盘</h2>
+<p class="description">点击转盘或下方按钮开始抽取今日跑步距离，每人每天只能抽取一次哦！</p>
+
+<div id="wheel-wrapper">
+    <div id="wheel"></div>
+</div>
+
+<button id="spin-button" class="spin-btn">开始抽取</button>
+
+<div id="result">等待抽取结果...</div>
+
+<div class="stats">
+    <div class="stat-box">
+        <div>今日抽取</div>
+        <div id="today-count" class="stat-value">0</div>
     </div>
+    <div class="stat-box">
+        <div>总抽取次数</div>
+        <div id="total-count" class="stat-value">0</div>
+    </div>
+</div>
 
-    <script>
-        const prizes = ['Double 5.20km', '5.55km', '6.66km', '7.77km', '8.88km', '你说了不算'];
-        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F'];
-        const wheel = document.getElementById('wheel');
+<footer>温馨提示：请合理跑步，健康生活！切勿模仿！</footer>
 
-        // 创建扇形
-        prizes.forEach((prize, index) => {
-            const section = document.createElement('div');
-            section.className = 'section';
-            section.style.background = colors[index];
-            section.style.transform = `rotate(${index * 60}deg)`;
-            section.textContent = prize;
-            wheel.appendChild(section);
-        });
+<script>
+// 1. 奖品、权重及独特颜色设置
+const prizes = [
+    { text:'Double 5.20km', weight:20,  color:'#FF6B6B' }, // 亮红色
+    { text:'5.55km',        weight:30, color:'#4ECDC4' }, // 青绿色
+    { text:'6.66km',        weight:20, color:'#45B7D1' }, // 天蓝色
+    { text:'7.77km',        weight:10, color:'#FFA07A' }, // 浅橙色
+    { text:'8.88km',        weight:5, color:'#98D8C8' }, // 薄荷绿
+    { text:'你说了不算',    weight:15, color:'#F7DC6F' }  // 金黄色
+];
+const totalWeight = prizes.reduce((s, p) => s + p.weight, 0);
 
-        let isSpinning = false;
-        wheel.addEventListener('click', () => {
-            if (isSpinning) return;
+// 2. 计算每个奖项的角度范围
+let start = 0;
+prizes.forEach(p => {
+    p.startDeg = start;
+    p.endDeg   = start + (p.weight / totalWeight) * 360;
+    start = p.endDeg;
+});
 
-            const today = new Date().toISOString().slice(0, 10);
-            if (localStorage.getItem('wheelLastDraw') === today) {
-                alert('今天已经抽过啦，你要跑死主包是吧！');
-                return;
-            }
+// 3. 绘制转盘扇形（使用各部分独特颜色）
+const wheel = document.getElementById('wheel');
+const gradientStops = prizes.map(p => `${p.color} ${p.startDeg}deg ${p.endDeg}deg`).join(',');
+wheel.style.background = `conic-gradient(${gradientStops})`;
 
-            isSpinning = true;
-            const randomDegree = 1800 + Math.floor(Math.random() * 360);
-            wheel.style.transform = `rotate(${randomDegree}deg)`;
+// 4. 精确计算并放置文字 - 确保与扇形区域中心对应
+const radiusPercent = 40; // 优化文字距离圆心的距离
 
-            setTimeout(() => {
-                isSpinning = false;
-                const actualDegree = randomDegree % 360;
-                const prizeIndex = Math.floor((360 - actualDegree) / 60);
-                alert(`恭喜主包喜提：${prizes[prizeIndex]}`);
-                localStorage.setItem('wheelLastDraw', today);
-            }, 3000);
-        });
-    </script>
+prizes.forEach(prize => {
+    // 计算扇形的中心点角度
+    const centerAngle = (prize.startDeg + prize.endDeg) / 2;
+    
+    // 转换为弧度用于计算坐标
+    const radians = centerAngle * Math.PI / 180;
+    
+    // 计算扇形宽度（角度）
+    const sectorWidth = prize.endDeg - prize.startDeg;
+    
+    // 优化字体大小计算，确保适应扇形宽度
+    let fontSize = Math.min(sectorWidth * 0.5, 18); // 基于扇形宽度的字体大小
+    fontSize = Math.max(fontSize, 11); // 最小字体大小
+    
+    // 根据文字长度进一步调整
+    const lengthFactor = prize.text.length > 7 ? 0.8 : 1;
+    fontSize *= lengthFactor;
+    
+    // 创建文字元素
+    const label = document.createElement('div');
+    label.className = 'label';
+    label.textContent = prize.text;
+    label.style.fontSize = `${fontSize}px`;
+    label.style.width = `${sectorWidth * 1.6}px`; // 优化文字容器宽度
+    
+    // 精确计算文字位置（确保在扇形中心）
+    const x = 50 + radiusPercent * Math.cos(radians);
+    const y = 50 + radiusPercent * Math.sin(radians);
+    
+    // 设置文字位置
+    label.style.left = `${x}%`;
+    label.style.top = `${y}%`;
+    
+    // 调整文字旋转角度，使其与扇形边缘垂直且保持可读性
+    let rotation = centerAngle + 90;
+    if (centerAngle > 90 && centerAngle < 270) {
+        rotation += 180; // 右侧文字翻转180度
+    }
+    label.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+    
+    wheel.appendChild(label);
+});
+
+// 5. 抽奖功能
+let isSpinning = false;
+const spinButton = document.getElementById('spin-button');
+const resultDiv = document.getElementById('result');
+const todayCountDiv = document.getElementById('today-count');
+const totalCountDiv = document.getElementById('total-count');
+
+// 从本地存储获取统计数据
+let stats = JSON.parse(localStorage.getItem('wheelStats')) || {
+    today: 0,
+    total: 0,
+    lastDrawDate: ''
+};
+
+// 如果日期改变，重置今日次数
+const today = new Date().toISOString().slice(0, 10);
+if (stats.lastDrawDate !== today) {
+    stats.today = 0;
+    stats.lastDrawDate = today;
+}
+
+// 更新统计显示
+todayCountDiv.textContent = stats.today;
+totalCountDiv.textContent = stats.total;
+
+function spinWheel() {
+    if (isSpinning) return;
+    if (stats.today >= 1) {
+        alert('今天已经抽过啦，你要跑死主包是吧！');
+        return;
+    }
+    
+    isSpinning = true;
+    spinButton.disabled = true;
+    resultDiv.textContent = "转盘旋转中...";
+    resultDiv.classList.remove('highlight');
+
+    // 随机选择奖项
+    const r = Math.random();
+    let cum = 0, idx = 0;
+    for (let i = 0; i < prizes.length; i++) {
+        cum += prizes[i].weight / totalWeight;
+        if (r < cum) { idx = i; break; }
+    }
+
+    // 旋转到目标位置
+    const p = prizes[idx];
+    const targetDeg = 1800 + (p.startDeg + Math.random() * (p.endDeg - p.startDeg));
+    wheel.style.transform = `rotate(${targetDeg}deg)`;
+
+    // 旋转结束处理
+    setTimeout(() => {
+        isSpinning = false;
+        spinButton.disabled = false;
+        
+        resultDiv.textContent = `恭喜主包喜提：${p.text}！`;
+        resultDiv.classList.add('highlight');
+        
+        // 更新统计
+        stats.today = 1;
+        stats.total++;
+        stats.lastDrawDate = today;
+        localStorage.setItem('wheelStats', JSON.stringify(stats));
+        
+        todayCountDiv.textContent = stats.today;
+        totalCountDiv.textContent = stats.total;
+    }, 3000);
+}
+
+// 添加点击事件
+wheel.addEventListener('click', spinWheel);
+spinButton.addEventListener('click', spinWheel);
+</script>
 </body>
 </html>
