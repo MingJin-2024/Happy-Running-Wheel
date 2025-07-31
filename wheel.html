@@ -134,7 +134,7 @@ footer {
 </head>
 
 <body>
-<h2>MingJin快乐跑距离转盘</h2>
+<h2>MingJin快乐跑转盘</h2>
 <p class="description">点击转盘或下方按钮开始抽取今日跑步距离，每人每天只能抽取一次哦！</p>
 
 <div id="wheel-wrapper">
@@ -183,25 +183,32 @@ const wheel = document.getElementById('wheel');
 const gradientStops = prizes.map(p => `${p.color} ${p.startDeg}deg ${p.endDeg}deg`).join(',');
 wheel.style.background = `conic-gradient(${gradientStops})`;
 
-// 4. 精确计算并放置文字 - 确保与扇形区域中心对应
-const radiusPercent = 40; // 优化文字距离圆心的距离
+//调整文字标签
+// 调整1：统一基础半径，减少动态缩放的差异
+const baseRadius = 40; // 基础半径比例（所有标签的基准距离）
+const minSectorWidth = 20; // 更严格的窄扇形判断阈值（缩小触发条件）
 
 prizes.forEach(prize => {
-    // 计算扇形的中心点角度
+    // 计算扇形的中心点角度（确保在0-360°范围内）
     const centerAngle = (prize.startDeg + prize.endDeg) / 2;
+    const normalizedAngle = (centerAngle % 360 + 360) % 360; // 处理负角度
     
-    // 转换为弧度用于计算坐标
-    const radians = centerAngle * Math.PI / 180;
+    // 转换为弧度（修正角度起点偏差）
+    const radians = normalizedAngle * Math.PI / 180;
+    const adjustedRadians = radians - Math.PI / 2; // 修正三角函数角度起点（0°从顶部开始）
     
     // 计算扇形宽度（角度）
     const sectorWidth = prize.endDeg - prize.startDeg;
     
-    // 优化字体大小计算，确保适应扇形宽度
-    let fontSize = Math.min(sectorWidth * 0.5, 18); // 基于扇形宽度的字体大小
-    fontSize = Math.max(fontSize, 11); // 最小字体大小
+    // 调整2：优化半径计算，减少差异（仅对极窄扇形缩小）
+    // 解决8.88km等标签半径不一致的问题
+    const radiusScale = sectorWidth < minSectorWidth ? 0.9 : 1; // 缩小比例从0.8调整为0.9，减少差异
+    const radiusPercent = baseRadius * radiusScale;
     
-    // 根据文字长度进一步调整
-    const lengthFactor = prize.text.length > 7 ? 0.8 : 1;
+    // 调整3：优化字体大小，与扇形宽度更匹配
+    let fontSize = Math.min(sectorWidth * 0.5, 16); // 适当放大系数
+    fontSize = Math.max(fontSize, 10);
+    const lengthFactor = prize.text.length > 6 ? 0.8 : 1; // 文字长度系数调整
     fontSize *= lengthFactor;
     
     // 创建文字元素
@@ -209,21 +216,24 @@ prizes.forEach(prize => {
     label.className = 'label';
     label.textContent = prize.text;
     label.style.fontSize = `${fontSize}px`;
-    label.style.width = `${sectorWidth * 1.6}px`; // 优化文字容器宽度
+    label.style.width = `${sectorWidth * 1.6}px`;
+    label.style.position = 'absolute';
+    label.style.textAlign = 'center'; // 确保文字居中，避免偏移
     
-    // 精确计算文字位置（确保在扇形中心）
-    const x = 50 + radiusPercent * Math.cos(radians);
-    const y = 50 + radiusPercent * Math.sin(radians);
-    
-    // 设置文字位置
+    // 计算标签坐标（基于修正后的角度）
+    const x = 50 + radiusPercent * Math.cos(adjustedRadians);
+    const y = 50 + radiusPercent * Math.sin(adjustedRadians);
     label.style.left = `${x}%`;
     label.style.top = `${y}%`;
     
-    // 调整文字旋转角度，使其与扇形边缘垂直且保持可读性
-    let rotation = centerAngle + 90;
-    if (centerAngle > 90 && centerAngle < 270) {
-        rotation += 180; // 右侧文字翻转180度
+    // 调整4：统一文字方向（确保所有标签正向可读）
+    // 根据角度所在象限判断旋转方向，避免混乱
+    let rotation = normalizedAngle;
+    // 右侧区域（90°-270°）文字翻转180°，确保正向
+    if (normalizedAngle > 90 && normalizedAngle < 270) {
+        rotation += 180;
     }
+    // 强制文字保持水平或垂直，避免倾斜过度
     label.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
     
     wheel.appendChild(label);
