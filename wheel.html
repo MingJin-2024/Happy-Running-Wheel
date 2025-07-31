@@ -183,8 +183,8 @@ const wheel = document.getElementById('wheel');
 const gradientStops = prizes.map(p => `${p.color} ${p.startDeg}deg ${p.endDeg}deg`).join(',');
 wheel.style.background = `conic-gradient(${gradientStops})`;
 
-//调整文字标签
-// 调整1：统一基础半径，减少动态缩放的差异
+//4.调整文字标签
+// 1：统一基础半径，减少动态缩放的差异
 const baseRadius = 40; // 基础半径比例（所有标签的基准距离）
 const minSectorWidth = 20; // 更严格的窄扇形判断阈值（缩小触发条件）
 
@@ -200,12 +200,12 @@ prizes.forEach(prize => {
     // 计算扇形宽度（角度）
     const sectorWidth = prize.endDeg - prize.startDeg;
     
-    // 调整2：优化半径计算，减少差异（仅对极窄扇形缩小）
+    // 2：优化半径计算，减少差异（仅对极窄扇形缩小）
     // 解决8.88km等标签半径不一致的问题
     const radiusScale = sectorWidth < minSectorWidth ? 0.9 : 1; // 缩小比例从0.8调整为0.9，减少差异
     const radiusPercent = baseRadius * radiusScale;
     
-    // 调整3：优化字体大小，与扇形宽度更匹配
+    // 3：优化字体大小，与扇形宽度更匹配
     let fontSize = Math.min(sectorWidth * 0.5, 16); // 适当放大系数
     fontSize = Math.max(fontSize, 10);
     const lengthFactor = prize.text.length > 6 ? 0.8 : 1; // 文字长度系数调整
@@ -226,7 +226,7 @@ prizes.forEach(prize => {
     label.style.left = `${x}%`;
     label.style.top = `${y}%`;
     
-    // 调整4：统一文字方向（确保所有标签正向可读）
+    // 4：统一文字方向（确保所有标签正向可读）
     // 根据角度所在象限判断旋转方向，避免混乱
     let rotation = normalizedAngle;
     // 右侧区域（90°-270°）文字翻转180°，确保正向
@@ -276,17 +276,9 @@ function spinWheel() {
     resultDiv.textContent = "转盘旋转中...";
     resultDiv.classList.remove('highlight');
 
-    // 随机选择奖项
-    const r = Math.random();
-    let cum = 0, idx = 0;
-    for (let i = 0; i < prizes.length; i++) {
-        cum += prizes[i].weight / totalWeight;
-        if (r < cum) { idx = i; break; }
-    }
-
-    // 旋转到目标位置
-    const p = prizes[idx];
-    const targetDeg = 1800 + (p.startDeg + Math.random() * (p.endDeg - p.startDeg));
+    // 生成随机旋转角度（3-5圈加上随机角度）
+    const randomDeg = Math.random() * 360;
+    const targetDeg = 1080 + 720 * Math.random() + randomDeg; // 3-5圈随机旋转
     wheel.style.transform = `rotate(${targetDeg}deg)`;
 
     // 旋转结束处理
@@ -294,7 +286,29 @@ function spinWheel() {
         isSpinning = false;
         spinButton.disabled = false;
         
-        resultDiv.textContent = `恭喜主包喜提：${p.text}！`;
+        // 计算最终停在的角度（取模360，转换为0-360度）
+        const finalDeg = targetDeg % 360;
+        // 转换为从顶部开始计算的角度（因为指针在顶部）
+        const normalizedDeg = (360 - finalDeg) % 360;
+        
+        // 找到对应的奖项
+        let winningPrize = null;
+        for (const prize of prizes) {
+            // 处理360度边界情况
+            if (prize.startDeg <= prize.endDeg) {
+                if (normalizedDeg >= prize.startDeg && normalizedDeg < prize.endDeg) {
+                    winningPrize = prize;
+                    break;
+                }
+            } else {
+                if (normalizedDeg >= prize.startDeg || normalizedDeg < prize.endDeg) {
+                    winningPrize = prize;
+                    break;
+                }
+            }
+        }
+        
+        resultDiv.textContent = `恭喜主包喜提：${winningPrize.text}！`;
         resultDiv.classList.add('highlight');
         
         // 更新统计
